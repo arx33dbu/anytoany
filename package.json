@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "docx": "^9.15.3",
+    "docx-preview": "^0.4.1",
+    "html2canvas": "^1.4.1",
     "jszip": "^3.10.2",
     "lucide-react": "^1.70.0",
     "mammoth": "^1.13.0",

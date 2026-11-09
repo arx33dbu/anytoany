@@ -10,7 +10,6 @@ import type { ConversionItem, ImageEditState, MediaEditState, DocumentEditState 
 import { detectCategory, formatFileSize, getAvailableTargets, getFileExtension } from './utils/formatRegistry';
 import { convertSingleItem } from './services/conversionEngine';
 import { exportFilesAsZip } from './utils/zipExporter';
-import { createSampleDocument, createSampleImage, createSampleDataset } from './utils/sampleData';
 
 export function App() {
   const [items, setItems] = useState<ConversionItem[]>([]);
@@ -49,7 +48,6 @@ export function App() {
   // Clipboard paste listener: paste screenshot, file, or text directly
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
-      // Check if user is currently typing in an input or textarea
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
@@ -220,20 +218,6 @@ export function App() {
     });
   };
 
-  // Load sample presets
-  const handleLoadSample = async (type: 'doc' | 'image' | 'data') => {
-    if (type === 'doc') {
-      const docFile = createSampleDocument();
-      addFilesToQueue([docFile]);
-    } else if (type === 'image') {
-      const imgFile = await createSampleImage();
-      addFilesToQueue([imgFile]);
-    } else if (type === 'data') {
-      const dataFile = createSampleDataset();
-      addFilesToQueue([dataFile]);
-    }
-  };
-
   // Save edits from EditorModal
   const handleSaveEdits = (
     id: string,
@@ -244,17 +228,33 @@ export function App() {
     }
   ) => {
     setItems((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? {
-              ...i,
-              ...edits,
-              status: 'idle',
-              progress: 0,
-              resultBlob: undefined,
-            }
-          : i
-      )
+      prev.map((i) => {
+        if (i.id !== id) return i;
+
+        // If user edited in PDF Studio and produced a modified PDF blob
+        if (edits.documentEdits?.modifiedBlob) {
+          const modBlob = edits.documentEdits.modifiedBlob;
+          const modUrl = URL.createObjectURL(modBlob);
+          return {
+            ...i,
+            ...edits,
+            targetExt: 'pdf',
+            status: 'completed',
+            progress: 100,
+            resultBlob: modBlob,
+            resultUrl: modUrl,
+            resultName: `${i.name.replace(/\.[^/.]+$/, '')}_edited.pdf`,
+          };
+        }
+
+        return {
+          ...i,
+          ...edits,
+          status: 'idle',
+          progress: 0,
+          resultBlob: undefined,
+        };
+      })
     );
   };
 
@@ -276,8 +276,8 @@ export function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* DropZone */}
-        <DropZone onFilesSelected={addFilesToQueue} onLoadSample={handleLoadSample} />
+        {/* DropZone without sample buttons */}
+        <DropZone onFilesSelected={addFilesToQueue} />
 
         {/* Batch Toolbar */}
         {items.length > 0 && (

@@ -1,12 +1,11 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, FileText, Image as ImageIcon, Database } from 'lucide-react';
+import { UploadCloud } from 'lucide-react';
 
 interface DropZoneProps {
   onFilesSelected: (files: File[]) => void;
-  onLoadSample: (type: 'doc' | 'image' | 'data') => void;
 }
 
-export const DropZone: React.FC<DropZoneProps> = ({ onFilesSelected, onLoadSample }) => {
+export const DropZone: React.FC<DropZoneProps> = ({ onFilesSelected }) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,40 +75,9 @@ export const DropZone: React.FC<DropZoneProps> = ({ onFilesSelected, onLoadSampl
           </button>
         </div>
 
-        <p className="text-xs text-zinc-400 mb-4 font-mono">
+        <p className="text-xs text-zinc-400 font-mono">
           Documents (DOCX, PDF, MD) · Images · Audio · Video · Data (CSV, JSON, XLSX)
         </p>
-
-        {/* Quick Sample Presets */}
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-2 border-t border-zinc-800/80 w-full">
-          <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">
-            Load sample:
-          </span>
-          <button
-            type="button"
-            onClick={() => onLoadSample('doc')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-xs text-zinc-300 hover:text-white transition-colors cursor-pointer"
-          >
-            <FileText className="w-3 h-3 text-zinc-400" />
-            <span>Document</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onLoadSample('image')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-xs text-zinc-300 hover:text-white transition-colors cursor-pointer"
-          >
-            <ImageIcon className="w-3 h-3 text-zinc-400" />
-            <span>Image</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onLoadSample('data')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-xs text-zinc-300 hover:text-white transition-colors cursor-pointer"
-          >
-            <Database className="w-3 h-3 text-zinc-400" />
-            <span>Dataset</span>
-          </button>
-        </div>
       </div>
     </div>
   );

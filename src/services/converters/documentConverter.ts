@@ -4,6 +4,7 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { DocumentEditState } from '../../types';
 import { extractPdfText, renderPdfToCanvases } from './pdfHelper';
+import { convertDocxToFidelityPdf, convertDocxToFidelityHtml } from './docxRenderer';
 
 // Read Blob to ArrayBuffer
 export async function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
@@ -246,10 +247,21 @@ export async function convertDocument(
   let activeText = edits?.textContent;
   let activeHtml = edits?.htmlContent;
 
+  // High fidelity DOCX conversions
+  if ((sExt === 'docx' || sExt === 'doc') && !activeText) {
+    if (tExt === 'pdf') {
+      return await convertDocxToFidelityPdf(sourceBlob);
+    }
+    if (tExt === 'html') {
+      const faithfulHtml = await convertDocxToFidelityHtml(sourceBlob);
+      return new Blob([faithfulHtml], { type: 'text/html' });
+    }
+  }
+
   if (!activeText && !activeHtml) {
     if (sExt === 'docx' || sExt === 'doc') {
-      activeHtml = await docxToHtml(sourceBlob);
-      activeText = await docxToText(sourceBlob);
+      activeHtml = await convertDocxToFidelityHtml(sourceBlob);
+      activeText = activeHtml.replace(/<[^>]+>/g, ' ');
     } else if (sExt === 'pdf') {
       activeText = await extractPdfText(sourceBlob);
     } else if (sExt === 'md' || sExt === 'markdown') {

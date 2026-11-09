@@ -55,6 +55,27 @@ export interface DocumentEditState {
   textContent?: string;
   htmlContent?: string;
   markdownContent?: string;
+  annotations?: PdfAnnotation[];
+  deletedPages?: number[];
+  pageRotations?: Record<number, number>;
+  modifiedBlob?: Blob;
+}
+
+export interface PdfAnnotation {
+  id: string;
+  pageIndex: number;
+  type: 'text' | 'highlight' | 'rectangle' | 'line' | 'whiteout' | 'draw' | 'stamp';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text?: string;
+  fontSize?: number;
+  color?: string;
+  fillColor?: string;
+  strokeWidth?: number;
+  opacity?: number;
+  points?: { x: number; y: number }[];
 }
 
 export interface ConversionItem {
